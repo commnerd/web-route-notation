@@ -3,8 +3,11 @@ Create web routes for your app in a short-hand, readable notation
 
 ## Example 1:
 The following Web Route Notation:
+
 `+GPUADH/commnerd/web-route-notation[middleware1,middleware2]*route.name@Handler#method`
+
 will translate to:
+
 ```json
 [
   {
@@ -28,7 +31,7 @@ will translate to:
 ]
 ```
 
-Delimiter Definitions:
+### Delimiter Definitions:
 - "+" Delimits the verbs and a new route, if immediately followed by one of the following delimiters, all routes will map to this -definition
 - "/" Initiates the start of the path
 - "[]" Delimits middlewares
@@ -36,9 +39,10 @@ Delimiter Definitions:
 - "@" Delimits the Controller for a route
 - "#" Delimits the Method within the controller
 - "()" Delimits a group
-Order does not matter.
 
-Http Verb Mapping:
+Note: Order does not matter.
+
+### Http Verb Mapping:
 - G = GET
 - P = POST
 - U = PUT
@@ -47,7 +51,9 @@ Http Verb Mapping:
 - H = HEAD
 
 ## Example 2:
+
 Web Route Notation:
+
 ```
 +/@HomeController#index
 +GP/route1@RouteController
