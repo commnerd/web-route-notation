@@ -62,15 +62,7 @@ Will generate the following translation:
   {
     "controller": "HomeController",
     "method": "index",
-    "route": "/",
-    "verbs": [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "HEAD"
-    ]
+    "route": "/"
   },
   {
     "controller": "RouteController",
@@ -88,22 +80,10 @@ Will generate the following translation:
     "verbs": [
       "DELETE"
     ],
-    "middlewares": [
-      "middleware1",
-      "middleware2"
-    ]
   },
   {
     "name": "subrouteName",
     "route": "/subroute/",
-    "verbs": [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "HEAD"
-    ],
     "group": [
       {
         "name": "subrouteName",
@@ -111,14 +91,6 @@ Will generate the following translation:
         "middlewares": [
           "middleware"
         ],
-        "verbs": [
-          "GET",
-          "POST",
-          "PUT",
-          "PATCH",
-          "DELETE",
-          "HEAD"
-        ]
       }
     ]
   }
