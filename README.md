@@ -1,7 +1,7 @@
 # Web Route Notation 
 Create web routes for your app in a short-hand, readable notation
 
-##Example 1:
+## Example 1:
 The following Web Route Notation:
 `+GPUADH/commnerd/web-route-notation[middleware1,middleware2]*route.name@Handler#method`
 will translate to:
@@ -46,7 +46,7 @@ Http Verb Mapping:
 - D = DELETE
 - H = HEAD
 
-##Example 2:
+## Example 2:
 Web Route Notation:
 ```
 +/@HomeController#index
