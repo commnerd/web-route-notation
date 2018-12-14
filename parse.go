@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/golang-collections/collections/stack"
-//	"fmt"
+	"fmt"
     "io"
     "os"
 )
@@ -68,13 +68,16 @@ type Route struct {
 	Group		[]Routable	`json:"group,omitempty"`
 }
 
-var TopGroup = new(Group)
+var TopGroup = &Group{}
 var ActiveGroup = TopGroup
-var ActiveRoute Route
+var ActiveRoute *Route
+var ParenStack *stack.Stack = stack.New()
 var WriteChannel *string
-var parenStack = stack.New()
+var WriteContext []string = []string{}
 
 func main() {
+	Text := ""
+	WriteChannel = &Text
 	tokenize()
 }
 
@@ -101,42 +104,69 @@ func processByte(b []byte) {
 	case ' ':
 		return
 	case DELIM_ROUTE:
-		ActiveRoute = Route{}
+		ActiveRoute = &Route{}
 		ActiveGroup.Routables = append(ActiveGroup.Routables, ActiveRoute)
 		return
 	case DELIM_PATH:
+		fmt.Print(string(&ActiveRoute.Path) + " ")
+		fmt.Println(string(WriteChannel))
+		if &ActiveRoute.Path == WriteChannel {
+			return
+		}
 		ActiveRoute.Path = *new(string)
 		WriteChannel = &ActiveRoute.Path
 		ActiveRoute.Path += string(b)
 		return
 	case DELIM_MID_START:
-		parenStack.Push(b)
-
+		ParenStack.Push(b)
+		FreshString := ""
+		WriteChannel = &FreshString
+		WriteContext = append(WriteContext, *WriteChannel)
 		return
 	case DELIM_MID_END:
-		if parenStack.Pop() != DELIM_MID_START {
+		if string(ParenStack.Pop().([]uint8)) != string(DELIM_MID_START) {
 			panic(1)
 		}
+		WriteContext = nil
 		return
 	case DELIM_NAME:
+		FreshString := ""
+		WriteChannel = &FreshString
+		ActiveRoute.Name = *WriteChannel
 		return
 	case DELIM_CONTROLLER:
+		FreshString := ""
+		WriteChannel = &FreshString
+		ActiveRoute.Controller = *WriteChannel
 		return
 	case DELIM_METHOD:
+		FreshString := ""
+		WriteChannel = &FreshString
+		ActiveRoute.Method = *WriteChannel
 		return
 	case DELIM_GROUP_START:
-		parenStack.Push(b)
+		ParenStack.Push(b)
 		group := new(Group)
 		group.ParentGroup = ActiveGroup
 		ActiveGroup = group
+		WriteChannel = nil
 		return
 	case DELIM_GROUP_END:
-		if parenStack.Pop() != DELIM_GROUP_START || ActiveGroup.ParentGroup == nil {
+		if string(ParenStack.Pop().([]uint8)) != string(DELIM_GROUP_START) || ActiveGroup.ParentGroup == nil {
 			panic(1)
 		}
 		ActiveGroup = ActiveGroup.ParentGroup
+		WriteChannel = nil
+		return
+	case DELIM_VAL:
+		WriteContext = append(WriteContext, *WriteChannel)
+		FreshString := ""
+		WriteChannel = &FreshString
 		return
 	default:
+		StringCat := *WriteChannel + string(b)
+		WriteChannel = &StringCat
+		fmt.Println(*WriteChannel)
 		break;
 	}
 
