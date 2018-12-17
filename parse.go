@@ -74,6 +74,7 @@ var ActiveRoute *Route
 var ParenStack *stack.Stack = stack.New()
 var WriteChannel *string
 var WriteContext []string = []string{}
+var ActiveDelim uint8
 
 func main() {
 	Text := ""
@@ -104,47 +105,55 @@ func processByte(b []byte) {
 	case ' ':
 		return
 	case DELIM_ROUTE:
+		ActiveDelim = DELIM_ROUTE
 		ActiveRoute = &Route{}
 		ActiveGroup.Routables = append(ActiveGroup.Routables, ActiveRoute)
 		return
 	case DELIM_PATH:
-		fmt.Print(string(&ActiveRoute.Path) + " ")
-		fmt.Println(string(WriteChannel))
-		if &ActiveRoute.Path == WriteChannel {
+		if ActiveDelim == DELIM_PATH {
+			StringCat := *WriteChannel + string(b)
+			WriteChannel = &StringCat
 			return
 		}
+		ActiveDelim = DELIM_PATH
 		ActiveRoute.Path = *new(string)
 		WriteChannel = &ActiveRoute.Path
 		ActiveRoute.Path += string(b)
 		return
 	case DELIM_MID_START:
+		ActiveDelim = DELIM_MID_START
 		ParenStack.Push(b)
 		FreshString := ""
 		WriteChannel = &FreshString
 		WriteContext = append(WriteContext, *WriteChannel)
 		return
 	case DELIM_MID_END:
+		ActiveDelim = DELIM_MID_END
 		if string(ParenStack.Pop().([]uint8)) != string(DELIM_MID_START) {
 			panic(1)
 		}
 		WriteContext = nil
 		return
 	case DELIM_NAME:
+		ActiveDelim = DELIM_NAME
 		FreshString := ""
 		WriteChannel = &FreshString
 		ActiveRoute.Name = *WriteChannel
 		return
 	case DELIM_CONTROLLER:
+		ActiveDelim = DELIM_CONTROLLER
 		FreshString := ""
 		WriteChannel = &FreshString
 		ActiveRoute.Controller = *WriteChannel
 		return
 	case DELIM_METHOD:
+		ActiveDelim = DELIM_METHOD
 		FreshString := ""
 		WriteChannel = &FreshString
 		ActiveRoute.Method = *WriteChannel
 		return
 	case DELIM_GROUP_START:
+		ActiveDelim = DELIM_GROUP_START
 		ParenStack.Push(b)
 		group := new(Group)
 		group.ParentGroup = ActiveGroup
@@ -155,10 +164,12 @@ func processByte(b []byte) {
 		if string(ParenStack.Pop().([]uint8)) != string(DELIM_GROUP_START) || ActiveGroup.ParentGroup == nil {
 			panic(1)
 		}
+		ActiveDelim = DELIM_GROUP_END
 		ActiveGroup = ActiveGroup.ParentGroup
 		WriteChannel = nil
 		return
 	case DELIM_VAL:
+		ActiveDelim = DELIM_VAL
 		WriteContext = append(WriteContext, *WriteChannel)
 		FreshString := ""
 		WriteChannel = &FreshString
